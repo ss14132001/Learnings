@@ -202,4 +202,18 @@ result.show()
 result = result.filter(F.col("Source") < F.col("Destination"))
 
 result.show()
+spark.conf.set("spark.sql.adaptive.enabled", "false")
+spark.conf.set("spark.sql.shuffle.partitions", "4")
+user_activity = (
+        [("U001", "login") for _ in range(200000)] +   # hot key
+        [("U002", "login") for _ in range(1000)] +
+        [("U003", "login") for _ in range(800)] +
+        [("U004", "login") for _ in range(600)]
+)
 
+df = spark.createDataFrame(user_activity, ["user_id", "event"])
+rf = df.groupBy("user_id").count()
+rf.show()
+
+
+input("Check Spark UI now...")
